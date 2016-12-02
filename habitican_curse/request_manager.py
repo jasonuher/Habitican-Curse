@@ -154,9 +154,9 @@ class RequestManager(object):
             task['down'] = True
 
 
-        DEBUG.Display("Creating Task...");
+        G.screen.write_status_bar("Creating Task...");
         ret_task = self.CreateTask(task)
-        DEBUG.Display(" ")
+        G.screen.write_status_bar(" ")
 
         DEBUG.logging.debug(ret_task)
 
@@ -191,14 +191,14 @@ class RequestManager(object):
         G.LastUpdate = datetime.datetime.now()
 
         #Get the user data from the API
-        DEBUG.Display("Connecting...")
+        G.screen.write_status_bar("Connecting...")
 
         user_json = self.FetchUserData()
         task_json = self.FetchUserTasks()
 
-        DEBUG.Display("Connected")
+        G.screen.write_status_bar("Connected")
         time.sleep(1)
-        DEBUG.Display(" ")
+        G.screen.write_status_bar(" ")
 
 
         # Initialize User Stats
@@ -243,7 +243,7 @@ class RequestManager(object):
         #TODO: most of this should not happen in the request manager
         import content as CT
 
-        DEBUG.Display("Please Wait...")
+        G.screen.write_status_bar("Please Wait...")
 
         Drops = list()
 
@@ -346,7 +346,7 @@ class RequestManager(object):
             G.screen.SaveInRegister(1)
             drop_items = []
             for i in Drops:
-                DEBUG.Display("Processing Drop %s..." % i);
+                G.screen.write_status_bar("Processing Drop %s..." % i);
                 drop_items += [M.SimpleTextItem(i)]
 
             dropMenu = M.SimpleTextMenu(drop_items, C.SCR_TEXT_AREA_LENGTH)

@@ -154,14 +154,14 @@ class Interface(object):
 
 
             if not Idx(parsed, 1) in  C.SET_COMMANDS:
-                DEBUG.Display("Invalid Set: " + command)
+                G.screen.write_status_bar("Invalid Set: " + command)
                 return
             c = Idx(parsed, 1)
 
             # Change Difficulty
             if c == "d":
                 if (not Idx(parsed, 2) in C.DIFFS) or (Idx(parsed, 3) != "") :
-                    DEBUG.Display("Invalid set d: " + Idx(parsed, 2))
+                    G.screen.write_status_bar("Invalid set d: " + Idx(parsed, 2))
                     return
                 key = Idx(parsed, 2)
                 G.currentTask.ChangePriority(key)
@@ -202,7 +202,7 @@ class Interface(object):
                     return
 
                 if not Idx(parsed, 2).isdigit():
-                    DEBUG.Display("Invalid number of days.")
+                    G.screen.write_status_bar("Invalid number of days.")
                     return
 
                 G.currentTask.SetEvery(int(Idx(parsed, 2)))
@@ -250,7 +250,7 @@ class Interface(object):
             return
 
         if command != "":
-            DEBUG.Display("Invalid: " + command)
+            G.screen.write_status_bar("Invalid: " + command)
 
 
     def Command(self, command):
@@ -270,9 +270,9 @@ class Interface(object):
 
             # User Stats
             while (G.content == None):
-                DEBUG.Display("Fetching Content...")
+                G.screen.write_status_bar("Fetching Content...")
                 time.sleep(5)
-            DEBUG.Display(" ")
+            G.screen.write_status_bar(" ")
 
             G.user.attrStats = H.GetUserStats(G.user.data)
 
@@ -303,7 +303,7 @@ class Interface(object):
             c = G.screen.GetCharacter()
 
             # Clear Notification Line
-            DEBUG.Display(" ")
+            G.screen.write_status_bar(" ")
 
             if c == curses.KEY_UP or c == ord('k'):
                 self.ScrollUp()
@@ -343,9 +343,9 @@ class Interface(object):
                        len(G.reqManager.MarkQueue) |
                        len(G.reqManager.DeleteQueue) |
                        len(G.reqManager.EditQueue) ):
-                        DEBUG.Display("No write since last change (add ! to override)")
+                        G.screen.write_status_bar("No write since last change (add ! to override)")
                         continue #Restart command loop
                     break #exit
 
-                G.screen.Display(" "*(C.SCR_Y-1), C.SCR_X-1, 0)
+                G.screen.clear_command_bar()
                 self.Command(command)

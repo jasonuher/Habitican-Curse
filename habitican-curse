@@ -23,21 +23,27 @@ def BookKeepingThread():
     G.user.PrintUserStats()
 
 def main(curses_screen):
+
+    # Setup the curses screens
     G.screen = Screen(curses_screen)
     G.screen.Initialize()
-    C.ConfigureRuntime(curses_screen)
+    C.ConfigureRuntime(G.screen.screen)
+
+    #Fetch the initial data
     G.reqManager = RM.RequestManager()
     G.reqManager.FetchData()
+
+    #Draw the baseline interface
     G.intf = I.Interface()
     G.intf.Init()
+
+    #Fetch the content data
     bookThread = threading.Thread(target=BookKeepingThread)
     bookThread.start()
-    #inputThread = threading.Thread(target=G.intf.Input)
-    #inputThread.start()
 
-
+    #Command loop
     G.intf.Input()
-    DEBUG.Display("Cleaning up...")
+    G.screen.write_status_bar("Cleaning up...")
     bookThread.join()
 
 if __name__ == "__main__":

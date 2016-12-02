@@ -335,7 +335,7 @@ class Menu(object):
         # Implemented specially for checklists and similar menus
         if self.menu_type == "checklist_menu":
             self.items[self.current].HighlightName()
-            DEBUG.Display("(c) confirm; (q) cancel")
+            G.screen.write_status_bar("(c) confirm; (q) cancel")
             self.backupItems = self.items[:-1]
         while(1):
             c = G.screen.GetCharacter()
@@ -554,7 +554,7 @@ class SimpleTextMenu(object):
         self.Display()
 
     def Input(self):
-        DEBUG.Display("Press q to exit...")
+        G.screen.write_status_bar("Press q to exit...")
         while(1):
             c = G.screen.GetCharacter()
             if c == curses.KEY_UP or c == ord('k'):
@@ -564,4 +564,4 @@ class SimpleTextMenu(object):
             elif c == 27 or c == ord('q'):
                 break
 
-            DEBUG.Display("Press q to exit...")
+            G.screen.write_status_bar("Press q to exit...")

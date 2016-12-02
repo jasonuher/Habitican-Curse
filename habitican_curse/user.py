@@ -76,58 +76,48 @@ class User(object):
         self.equipGear   = self.data['items']['gear']['equipped']
 
     def PrintData(self):
-        G.screen.Display(" "*(C.SCR_Y-1), C.SCR_X-2, 0,
-                color=C.SCR_COLOR_WHITE_GRAY_BGRD, bold=True)
+
+        #Clear the attribute bar
+        G.screen.bar_attr.erase()
 
         cursor = 1
         self.cursorPositions = []
 
         # Level
         string = C.SYMBOL_LEVEL + " " + str(self.lvl)
-        G.screen.Display(string, C.SCR_X-2, cursor,
-                color=C.SCR_COLOR_WHITE_GRAY_BGRD, bold=True)
-
+        G.screen.write_user_attribute(string,cursor,C.SCR_COLOR_WHITE_GRAY_BGRD)
         self.cursorPositions.append(cursor)
         cursor += len(string) + 3 - len(C.SYMBOL_LEVEL)
 
         # Health
         string = C.SYMBOL_HEART + " " + str(self.hp)+"/"+str(self.maxHealth)
-        G.screen.Display(string, C.SCR_X-2, cursor,
-                color=C.SCR_COLOR_RED_GRAY_BGRD, bold=True)
-
+        G.screen.write_user_attribute(string,cursor,C.SCR_COLOR_RED_GRAY_BGRD)
         self.cursorPositions.append(cursor)
         cursor += len(string) + 3 - len(C.SYMBOL_HEART)
 
         # XP
         string = C.SYMBOL_EXPERIENCE + " " + str(self.exp)+"/"+str(self.toNextLevel)
-        G.screen.Display(string, C.SCR_X-2, cursor,
-                color=C.SCR_COLOR_GREEN_GRAY_BGRD, bold=True)
-
+        G.screen.write_user_attribute(string,cursor,C.SCR_COLOR_GREEN_GRAY_BGRD)
         self.cursorPositions.append(cursor)
         cursor += len(string) + 3 - len(C.SYMBOL_EXPERIENCE)
 
         # Mana
         string = C.SYMBOL_MANA + " " + str(self.mp)+"/"+str(self.maxMP)
-        G.screen.Display(string, C.SCR_X-2, cursor,
-                color=C.SCR_COLOR_BLUE_GRAY_BGRD, bold=True)
-
+        G.screen.write_user_attribute(string,cursor,C.SCR_COLOR_BLUE_GRAY_BGRD)
         self.cursorPositions.append(cursor)
         cursor += len(string) + 3 - len(C.SYMBOL_MANA)
 
         # Gold
         string = C.SYMBOL_GOLD + " " + str(self.gp)
-        G.screen.Display(string, C.SCR_X-2, cursor,
-                color=C.SCR_COLOR_YELLOW_GRAY_BGRD, bold=True)
-
+        G.screen.write_user_attribute(string,cursor,C.SCR_COLOR_YELLOW_GRAY_BGRD)
         self.cursorPositions.append(cursor)
         cursor += len(string) + 3 - len(C.SYMBOL_GOLD)
 
         # Last Update
         string = "Last Update: " + G.LastUpdate.strftime("%H:%M:%S %d/%m")
-        G.screen.Display(string, C.SCR_X-2, cursor,
-                color=C.SCR_COLOR_MAGENTA_GRAY_BGRD, bold=True)
-
+        G.screen.write_user_attribute(string,cursor,C.SCR_COLOR_MAGENTA_GRAY_BGRD)
         self.cursorPositions.append(cursor)
+
         cursor += len(string) + 1
         self.cursorPositions.append(cursor)
 
@@ -141,8 +131,7 @@ class User(object):
                   "PER: " + str(self.attrStats['per']) + " " +
                   "CON: " + str(self.attrStats['con']))
 
-        G.screen.Display(string, C.SCR_X-2, C.SCR_Y-(3 + len(string)),
-                color=C.SCR_COLOR_MAGENTA_GRAY_BGRD, bold=True)
+        G.screen.write_user_attribute(string,C.SCR_Y-(3 + len(string)),C.SCR_COLOR_MAGENTA_GRAY_BGRD)
 
     def PrintDiff(self, newDict):
         diffDict = {}
@@ -160,25 +149,33 @@ class User(object):
         if diffDict['lvl'] != "":
             diffDict['exp'] = ""
 
+        #Clear the command bar
+        G.screen.bar_cmd.erase()
+
         # Level
-        G.screen.Display(diffDict['lvl'],C.SCR_X-1, self.cursorPositions[0]+2,
-                color=C.SCR_COLOR_WHITE, bold=True)
+        G.screen.write_user_attribute(
+                diffDict['lvl'],self.cursorPositions[0]+2,
+                C.SCR_COLOR_WHITE, window=G.screen.bar_cmd)
 
         # Health
-        G.screen.Display(diffDict['hp'], C.SCR_X-1, self.cursorPositions[1]+2,
-            color=C.SCR_COLOR_RED,  bold=True)
+        G.screen.write_user_attribute(
+                diffDict['hp'], self.cursorPositions[1]+2,
+                C.SCR_COLOR_RED, window=G.screen.bar_cmd)
 
         # Experience
-        G.screen.Display(diffDict['exp'], C.SCR_X-1, self.cursorPositions[2]+2,
-            color=C.SCR_COLOR_GREEN,  bold=True)
+        G.screen.write_user_attribute(
+                diffDict['exp'], self.cursorPositions[2]+2,
+                C.SCR_COLOR_GREEN, window=G.screen.bar_cmd)
 
         # Mana
-        G.screen.Display(diffDict['mp'], C.SCR_X-1, self.cursorPositions[3]+2,
-            color=C.SCR_COLOR_BLUE,  bold=True)
+        G.screen.write_user_attribute(
+                diffDict['mp'], self.cursorPositions[3]+2,
+                C.SCR_COLOR_BLUE, window=G.screen.bar_cmd)
 
         # Gold
-        G.screen.Display(diffDict['gp'], C.SCR_X-1, self.cursorPositions[4]+2,
-            color=C.SCR_COLOR_YELLOW,  bold=True)
+        G.screen.write_user_attribute(
+                diffDict['gp'], self.cursorPositions[4]+2,
+                C.SCR_COLOR_YELLOW, window=G.screen.bar_cmd)
 
     def GetPartyData(self):
 

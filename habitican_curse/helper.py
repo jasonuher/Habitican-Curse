@@ -233,7 +233,7 @@ class DateTime(object):
 def GetDifferenceTime(d2, d1=-1): # d1 - d2
     Date1 = DateTime(d1)
     Date2 = DateTime(d2)
-    #DEBUG.Display(Date1.DueDateFormat())
+    #G.screen.write_status_bar(Date1.DueDateFormat())
     #time.sleep(20)
 
 
@@ -355,12 +355,12 @@ def DatePicker():
     helpString = "Enter Date (dd/mm/yyyy): "
     G.screen.Display(helpString, X,5,color=C.SCR_COLOR_MAGENTA, bold=True)
     Y += len(helpString)
-    DEBUG.Display("Enter 'q' to exit.")
+    G.screen.write_status_bar("Enter 'q' to exit.")
 
     while(1):
         inpDate = G.screen.StringInput(X, Y)
         if inpDate == "q":
-            DEBUG.Display("")
+            G.screen.write_status_bar("")
             return
 
         finalDate = None
@@ -380,11 +380,11 @@ def DatePicker():
         if success:
             break
 
-        DEBUG.Display("Invalid Date. Please try again. Enter 'q' to cancel.")
+        G.screen.write_status_bar("Invalid Date. Please try again. Enter 'q' to cancel.")
         G.screen.ClearTextArea()
         G.screen.Display(helpString, X,5,color=C.SCR_COLOR_MAGENTA, bold=True)
 
-    DEBUG.Display("")
+    G.screen.write_status_bar("")
     return finalDate
 
 
@@ -395,7 +395,7 @@ def RepeatPicker(original=C.DEFAULT_REPEAT):
 
     X, Y = C.SCR_X-4, 5
     G.screen.ClearTextArea()
-    DEBUG.Display("Press arrow keys to navigate. (t) Toggle; (c) Confirm; (q) Cancel")
+    G.screen.write_status_bar("Press arrow keys to navigate. (t) Toggle; (c) Confirm; (q) Cancel")
     current = 0
     while(1):
         dY = Y
@@ -421,10 +421,10 @@ def RepeatPicker(original=C.DEFAULT_REPEAT):
         if c == ord('t'):
             newRepeat[sequence[current]]^=True
         elif c == ord('q'):
-            DEBUG.Display("")
+            G.screen.write_status_bar("")
             return None
         elif c == ord('c'):
-            DEBUG.Display("")
+            G.screen.write_status_bar("")
             return newRepeat
         elif c == curses.KEY_LEFT or c == ord('h'):
             current = max(0, current-1)
@@ -452,12 +452,12 @@ def TitlePicker():
         if success:
             break
 
-        DEBUG.Display(" Please enter a non-empty title string.")
+        G.screen.write_status_bar(" Please enter a non-empty title string.")
         G.screen.ClearTextArea()
         G.screen.Display(helpString,X, 5,
                 color=C.SCR_COLOR_MAGENTA, bold=True)
 
-    DEBUG.Display("")
+    G.screen.write_status_bar("")
     return inpTitle
 
 

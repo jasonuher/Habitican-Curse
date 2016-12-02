@@ -24,7 +24,7 @@ class ContentManager(object):
     """ Class for managing Habitica content """
 
     def __init__(self):
-        #DEBUG.Display("Content Fetching in progress...")
+        #G.screen.write_status_bar("Content Fetching in progress...")
         self.contentDict = G.reqManager.FetchGameContent()
 
     def Quest(self, key):
@@ -64,9 +64,9 @@ class Party(object):
         DEBUG.logging.debug("Current Quest: %s" % str(self.quest))
         if self.quest != None:
             while (G.content == None):
-                DEBUG.Display("Fetching Content...")
+                G.screen.write_status_bar("Fetching Content...")
                 time.sleep(5)
-            DEBUG.Display(" ")
+            G.screen.write_status_bar(" ")
 
             self.questDetails = G.content.Quest(str(self.quest['key']))
             self.questText    = str(self.questDetails['text'])
@@ -154,15 +154,15 @@ def EffectiveValueTask(value): # Value used for calculation of damages.
 
 def GetData():
 
-    DEBUG.Display("Please Wait...")
+    G.screen.write_status_bar("Please Wait...")
     data = G.reqManager.FetchUserData()
-    DEBUG.Display(" ")
+    G.screen.write_status_bar(" ")
 
     # Calculate Damage to User
     while (G.content == None):
-        DEBUG.Display("Fetching Content...")
+        G.screen.write_status_bar("Fetching Content...")
         time.sleep(5)
-    DEBUG.Display(" ")
+    G.screen.write_status_bar(" ")
 
     userStats = H.GetUserStats(data)
     stealth = data['stats']['buffs']['stealth']

@@ -17,6 +17,7 @@ import debug as DEBUG
 class Screen(object):
 
     def __init__(self, screen):
+        self.fullscreen = screen
         self.screen = screen
 
         # These are special context registers.
@@ -37,15 +38,15 @@ class Screen(object):
 
         self.lock = threading.RLock()
 
-    def Lock(self):
-        # Synchronize screen input/output
-        self.lock.acquire()
-
-    def Release(self):
-        # Synchronize screen input/output
-        self.lock.release()
+    ########################
+    #                      #
+    # Screen Functions     #
+    #                      #
+    ########################
+    #Things related directly to habiticancurse
 
     def Initialize(self):
+
         #global SCR_X, SCR_Y, SCR_MENU_ITEM_WIDTH
         # Cursor not visible
         curses.curs_set(0)
@@ -76,12 +77,183 @@ class Screen(object):
         curses.init_pair(C.SCR_COLOR_WHITE_GRAY_BGRD, curses.COLOR_WHITE, 234)
         curses.init_pair(C.SCR_COLOR_GRAY_WHITE_BGRD, 236, curses.COLOR_WHITE)
 
+
+        self.SCR_Y, self.SCR_X = self.screen.getmaxyx()
+
+        # The target global screen layout is this
+        # |-- Display bar-------------------------------------|
+        # +---------------------------------------------------+
+        # |                                                   |
+        # |           Items screen                            |
+        # |                                                   |
+        # |                                                   |
+        # +---------------------------------------------------+
+        # +---------------------------------------------------+
+        # |                                                   |
+        # |   Details Screen                                  |
+        # |                                                   |
+        # |                                                   |
+        # +---------------------------------------------------+
+        # |-- Stats bar --------------------------------------|
+        # |-- command Bar--- ---------------------------------|
+        self.status_display  = curses.newwin(1,self.SCR_X,          0,0)
+        self.screen_items    = curses.newwin(self.SCR_Y-3,self.SCR_X, 1,0)
+        #self.screen_details = curses.newwin(15,self.SCR_Y,15,0)
+        self.bar_attr        = curses.newwin(1,self.SCR_X,          self.SCR_Y-2,0)
+        self.bar_cmd         = curses.newwin(1,self.SCR_X,          self.SCR_Y-1,0)
+
+        self.screen = self.screen_items
+
         # Same as writing " " in white on a black background
         self.screen.bkgd(' ', curses.color_pair(C.SCR_COLOR_WHITE))
+        self.bar_attr.bkgd(' ',curses.color_pair(C.SCR_COLOR_WHITE_GRAY_BGRD))
+        self.bar_cmd.bkgd(' ',curses.color_pair(C.SCR_COLOR_WHITE))
 
         # Screen Specifications
         self.SCR_Y, self.SCR_X = self.screen.getmaxyx()
         self.SCR_MENU_ITEM_WIDTH = (self.SCR_X - 10)/3
+
+        # Test output
+        self.status_display.addstr("Status Display")
+        self.bar_attr.addstr("(stats bar)")
+        self.bar_cmd.addstr("(command bar)")
+        self.status_display.refresh()
+        self.bar_attr.refresh()
+        self.bar_cmd.refresh()
+
+    #Send a status message to the top br
+    def write_status_bar(self,string):
+
+        self.Lock()
+
+        try:
+            self.status_display.erase()
+            self.status_display.addstr(string)
+            if string is not " ":
+                DEBUG.logging.debug("UPDATE - \"%s\"" % string)
+        except curses.error:
+            #This is probably a cursor error, safe to ignore it?
+            DEBUG.logging.debug("Curses error: %s" % curses.ERR)
+            pass
+
+        self.status_display.refresh()
+        self.Release()
+
+    #Write a string to the user attribute bar
+    def write_user_diff(self, string,offset, color):
+
+        self.Lock()
+        self.bar_attr.addstr(0,offset,string,curses.A_BOLD | curses.color_pair(color))
+        self.bar_attr.refresh()
+        self.Release()
+
+    #Write a string to the user attribute bar
+    def write_user_attribute(self, string,offset, color, window=None):
+        if(window is None):
+            window = self.bar_attr
+
+        self.Lock()
+        window.addstr(0,offset,string,curses.A_BOLD | curses.color_pair(color))
+        window.refresh()
+        self.Release()
+
+    def clear_command_bar(self):
+        self.bar_cmd.erase()
+        self.bar_cmd.refresh()
+
+    #Emulate the vim command line (the ':' command)
+    #This shoud probably go into interface?
+    def Command(self):
+        DEBUG.logging.debug("Reading in a new command via :")
+        self.Lock()
+
+        self.bar_cmd.erase()
+        self.bar_cmd.addstr(":")
+        self.bar_cmd.refresh()
+
+        curses.echo()
+        curses.curs_set(1)
+        read_string = ""
+
+        cursor = 1
+        while(cursor < C.SCR_Y):
+            c = self.bar_cmd.getch(0, cursor)
+            if c == ord('\n'): # Enter Key
+                break
+            elif c == 27:        # Escape Key
+                self.Noecho()
+                self.CursorHide()
+                return ""
+            elif c == curses.KEY_BACKSPACE or c == curses.KEY_DC or c == 127:
+                cursor -= 1
+                if cursor == 0:
+                    self.Noecho()
+                    self.CursorHide()
+                    return ""
+
+                read_string = read_string[:-1]
+                self.bar_cmd.erase()
+                self.bar_cmd.addstr(":" + read_string)
+                self.bar_cmd.refresh()
+
+            else:
+                if c < 256:
+                    read_string += chr(c)
+                    cursor+=1
+                continue
+
+        self.Noecho()
+        self.CursorHide()
+
+        self.Release()
+        return read_string
+
+    def Display(self, string, x=0, y=0, bold=False, highlight=False,color=False,strike=False):
+    #    self.write_string(string,x,y,bold,highlight,color,strike)
+    #
+    #def write_string(self, string, x=0, y=0, bold=False, highlight=False,color=False,strike=False):
+        self.Lock()
+
+        #Does it need to be struck out?
+        if(strike):
+            string = u'\u0336'.encode("utf-8").join(string) + u'\u0336'.encode("utf-8")
+
+        if(highlight):
+            bold = True
+            color = C.SCR_COLOR_WHITE_GRAY_BGRD
+
+        options = 0
+        if(color):
+            options = options | curses.color_pair(color)
+        if(bold):
+            options = options | curses.A_BOLD
+
+        try:
+            self.screen.addstr(x, y, string, options)
+        except curses.error:
+            #This is probably a cursor error, safe to ignore it?
+            #DEBUG.logging.debug("Curses error: Pads throw incorrect size errors")
+            pass
+
+        self.Refresh()
+        self.Release()
+
+
+    ########################
+    #                      #
+    # Screen helpers       #
+    #                      #
+    ########################
+    #Non habiticancurse related helper functions for the screen
+
+    def Lock(self):
+        # Synchronize screen input/output
+        self.lock.acquire()
+
+    def Release(self):
+        # Synchronize screen input/output
+        self.lock.release()
+
 
     def Refresh(self):
         self.screen.refresh()
@@ -114,8 +286,8 @@ class Screen(object):
         self.screen = curses.getwin(self.ctxts[register])
 
         # Clear Notification Line
-        DEBUG.Display(" ")
-        self.Refresh()
+        self.status_display.erase()
+        self.status_display.refresh()
 
     def Save(self):
         self.stack.append(self.stackFile.tell())
@@ -130,38 +302,10 @@ class Screen(object):
         self.screen = curses.getwin(self.stackFile)
 
         # Clear Notification Line
-        DEBUG.Display(" ")
+        self.status_display.erase()
+        self.status_display.refresh()
 
         self.Refresh()
-
-
-
-    def Display(self, string, x=0, y=0, bold=False, highlight=False,color=False,strike=False):
-        self.Lock()
-
-        #Does it need to be struck out?
-        if(strike):
-            string = u'\u0336'.encode("utf-8").join(string) + u'\u0336'.encode("utf-8")
-
-        if(highlight):
-            bold = True
-            color = C.SCR_COLOR_WHITE_GRAY_BGRD
-
-        options = 0
-        if(color):
-            options = options | curses.color_pair(color)
-        if(bold):
-            options = options | curses.A_BOLD
-
-        try:
-            self.screen.addstr(x, y, string, options)
-        except curses.error:
-            #This is probably a cursor error, safe to ignore it?
-            #DEBUG.logging.debug("Curses error: Pads throw incorrect size errors")
-            pass
-
-        self.Refresh()
-        self.Release()
 
     def Highlight(self, string, x=0, y=0):
         self.Display(string, x, y, highlight=True)
@@ -192,44 +336,6 @@ class Screen(object):
         # Clear the area where tasks are displayed
         self.ClearRegion(C.SCR_MAX_MENU_ROWS+7, C.SCR_X-2, 0, C.SCR_Y)
 
-    def Command(self):
-        self.Lock()
-        self.Display(" "*(C.SCR_Y-1), C.SCR_X-1, 0)
-        self.Display(":", C.SCR_X-1, 0)
-
-        self.Echo()
-        self.CursorBlink()
-        read_string = ""
-
-        cursor = 1
-        while(cursor < C.SCR_Y):
-            c = self.screen.getch(C.SCR_X-1, cursor)
-            if c == ord('\n'): # Enter Key
-                break
-            elif c == 27:        # Escape Key
-                self.Noecho()
-                self.CursorHide()
-                return ""
-            elif c == curses.KEY_BACKSPACE or c == curses.KEY_DC or c == 127:
-                cursor -= 1
-                if cursor == 0:
-                    self.Noecho()
-                    self.CursorHide()
-                    return ""
-
-                self.Display(" "*(C.SCR_Y-1), C.SCR_X-1, 0)
-                read_string = read_string[:-1]
-                self.Display(":" + read_string, C.SCR_X-1, 0)
-
-            else:
-                if c < 256:
-                    read_string += chr(c)
-                    cursor+=1
-                continue
-        self.Noecho()
-        self.CursorHide()
-        self.Release()
-        return read_string
 
     def StringInput(self, x=0, y=0):
         self.Lock()
