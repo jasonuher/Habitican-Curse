@@ -10,9 +10,13 @@ import math
 import threading
 
 # Custom Module Imports
-
 import config as C
 import debug as DEBUG
+
+#Set up logging
+import logging
+logger = logging.getLogger(__name__)
+logger.debug("Debug logging started for %s..." % __name__)
 
 class Screen(object):
 
