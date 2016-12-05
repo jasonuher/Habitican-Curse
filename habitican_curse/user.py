@@ -10,7 +10,6 @@ import datetime
 
 import config as C
 import global_objects as G
-import debug as DEBUG
 import helper as H
 import menu as M
 import content as CT

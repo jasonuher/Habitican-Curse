@@ -17,7 +17,6 @@ import global_objects as G
 import helper as H
 import menu as M
 import task as T
-import debug as DEBUG
 import user as U
 
 #Set up logging

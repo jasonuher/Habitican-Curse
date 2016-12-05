@@ -14,7 +14,6 @@ import config as C
 from screen import Screen
 import global_objects as G
 import helper as H
-import debug as DEBUG
 import task as T
 
 def truncate(string, size):

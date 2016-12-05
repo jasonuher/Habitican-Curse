@@ -11,7 +11,6 @@ import threading
 
 # Custom Module Imports
 import config as C
-import debug as DEBUG
 
 #Set up logging
 import logging
@@ -134,10 +133,10 @@ class Screen(object):
             self.status_display.erase()
             self.status_display.addstr(string)
             if string is not " ":
-                DEBUG.logging.debug("UPDATE - \"%s\"" % string)
+                logger.debug("UPDATE - \"%s\"" % string)
         except curses.error:
             #This is probably a cursor error, safe to ignore it?
-            DEBUG.logging.debug("Curses error: %s" % curses.ERR)
+            logger.debug("Curses error: %s" % curses.ERR)
             pass
 
         self.status_display.refresh()
@@ -168,7 +167,7 @@ class Screen(object):
     #Emulate the vim command line (the ':' command)
     #This shoud probably go into interface?
     def Command(self):
-        DEBUG.logging.debug("Reading in a new command via :")
+        logger.debug("Reading in a new command via :")
         self.Lock()
 
         self.bar_cmd.erase()
