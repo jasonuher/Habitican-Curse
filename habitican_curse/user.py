@@ -179,9 +179,9 @@ class User(object):
 
     def GetPartyData(self):
 
-        DEBUG.Display("Please Wait...")
+        G.screen.write_status_bar("Creating Task...");
         resp = G.reqManager.FetchParty()
-        DEBUG.Display(" ")
+        G.screen.write_status_bar(" ")
 
         partyObj = CT.Party(resp)
         partyObj.Display()
