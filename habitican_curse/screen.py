@@ -84,14 +84,14 @@ class Screen(object):
         self.SCR_Y, self.SCR_X = self.screen.getmaxyx()
 
         # The target global screen layout is this
-        # |-- Display bar-------------------------------------|
-        # +---------------------------------------------------+
+        # |-- Display bar-------------------------------------| 0
+        # +---------------------------------------------------+ 1
         # |                                                   |
         # |           Items screen                            |
         # |                                                   |
         # |                                                   |
         # +---------------------------------------------------+
-        # +---------------------------------------------------+
+        # +---------------------------------------------------+ 1+C.SCR_MAX_MENU_ROWS+7
         # |                                                   |
         # |   Details Screen                                  |
         # |                                                   |
@@ -99,30 +99,44 @@ class Screen(object):
         # +---------------------------------------------------+
         # |-- Stats bar --------------------------------------|
         # |-- command Bar--- ---------------------------------|
-        self.status_display  = curses.newwin(1,self.SCR_X,          0,0)
-        self.screen_items    = curses.newwin(self.SCR_Y-3,self.SCR_X, 1,0)
-        #self.screen_details = curses.newwin(15,self.SCR_Y,15,0)
-        self.bar_attr        = curses.newwin(1,self.SCR_X,          self.SCR_Y-2,0)
-        self.bar_cmd         = curses.newwin(1,self.SCR_X,          self.SCR_Y-1,0)
+        self.StatusDisplay  = curses.newwin(1,                    self.SCR_X, 0,                      0)
+        self.WinItems       = curses.newwin(C.SCR_MAX_MENU_ROWS+4,self.SCR_X, 1,                      0)
+        self.WinDetails     = curses.newwin(self.SCR_Y-(C.SCR_MAX_MENU_ROWS+7),self.SCR_X, 1+C.SCR_MAX_MENU_ROWS+4,0)
+        self.BarAttributes  = curses.newwin(1,                    self.SCR_X, self.SCR_Y-2,           0)
+        self.BarCommand     = curses.newwin(1,                    self.SCR_X, self.SCR_Y-1,           0)
 
-        self.screen = self.screen_items
+        #Make a screen that overlays all of the others for big display related things
+        # (like the party info, help screen, etc)
+        self.WinOverlay = curses.newwin(self.SCR_Y-3-4,self.SCR_X-4,3,2)
+
+
+        #Some windows need borders
+        self.WinOverlay.border()
+        self.WinItems.border() #Hack for now, should shrink windows by 1 on L/R to make up for it
+        self.WinDetails.border()
+
+        #Hack to make old code work
+        self.screen = self.WinItems
+        #self.screen = self.WinDetails
 
         # Same as writing " " in white on a black background
-        self.screen.bkgd(' ', curses.color_pair(C.SCR_COLOR_WHITE))
-        self.bar_attr.bkgd(' ',curses.color_pair(C.SCR_COLOR_WHITE_GRAY_BGRD))
-        self.bar_cmd.bkgd(' ',curses.color_pair(C.SCR_COLOR_WHITE))
+        self.WinItems.bkgd(' ', curses.color_pair(C.SCR_COLOR_WHITE))
+        self.WinDetails.bkgd(' ', curses.color_pair(C.SCR_COLOR_WHITE))
+        self.BarAttributes.bkgd(' ',curses.color_pair(C.SCR_COLOR_WHITE_GRAY_BGRD))
+        self.BarCommand.bkgd(' ',curses.color_pair(C.SCR_COLOR_WHITE))
 
         # Screen Specifications
         self.SCR_Y, self.SCR_X = self.screen.getmaxyx()
         self.SCR_MENU_ITEM_WIDTH = (self.SCR_X - 10)/3
 
         # Test output
-        self.status_display.addstr("Status Display")
-        self.bar_attr.addstr("(stats bar)")
-        self.bar_cmd.addstr("(command bar)")
-        self.status_display.refresh()
-        self.bar_attr.refresh()
-        self.bar_cmd.refresh()
+        if(False):
+            self.StatusDisplay.addstr("Status Display")
+            self.BarAttributes.addstr("(stats bar)")
+            self.BarCommand.addstr("(command bar)")
+            self.StatusDisplay.refresh()
+            self.BarAttributes.refresh()
+            self.BarCommand.refresh()
 
     #Send a status message to the top br
     def write_status_bar(self,string):
@@ -130,8 +144,8 @@ class Screen(object):
         self.Lock()
 
         try:
-            self.status_display.erase()
-            self.status_display.addstr(string)
+            self.StatusDisplay.erase()
+            self.StatusDisplay.addstr(string)
             if string is not " ":
                 logger.debug("UPDATE - \"%s\"" % string)
         except curses.error:
@@ -139,21 +153,21 @@ class Screen(object):
             logger.debug("Curses error: %s" % curses.ERR)
             pass
 
-        self.status_display.refresh()
+        self.StatusDisplay.refresh()
         self.Release()
 
-    #Write a string to the user attribute bar
+    #Write a difference string below the user attribute bar (the command bar)
     def write_user_diff(self, string,offset, color):
 
         self.Lock()
-        self.bar_attr.addstr(0,offset,string,curses.A_BOLD | curses.color_pair(color))
-        self.bar_attr.refresh()
+        self.BarAttributes.addstr(0,offset,string,curses.A_BOLD | curses.color_pair(color))
+        self.BarAttributes.refresh()
         self.Release()
 
     #Write a string to the user attribute bar
     def write_user_attribute(self, string,offset, color, window=None):
         if(window is None):
-            window = self.bar_attr
+            window = self.BarAttributes
 
         self.Lock()
         window.addstr(0,offset,string,curses.A_BOLD | curses.color_pair(color))
@@ -161,8 +175,8 @@ class Screen(object):
         self.Release()
 
     def clear_command_bar(self):
-        self.bar_cmd.erase()
-        self.bar_cmd.refresh()
+        self.BarCommand.erase()
+        self.BarCommand.refresh()
 
     #Emulate the vim command line (the ':' command)
     #This shoud probably go into interface?
@@ -170,9 +184,9 @@ class Screen(object):
         logger.debug("Reading in a new command via :")
         self.Lock()
 
-        self.bar_cmd.erase()
-        self.bar_cmd.addstr(":")
-        self.bar_cmd.refresh()
+        self.BarCommand.erase()
+        self.BarCommand.addstr(":")
+        self.BarCommand.refresh()
 
         curses.echo()
         curses.curs_set(1)
@@ -180,7 +194,7 @@ class Screen(object):
 
         cursor = 1
         while(cursor < C.SCR_Y):
-            c = self.bar_cmd.getch(0, cursor)
+            c = self.BarCommand.getch(0, cursor)
             if c == ord('\n'): # Enter Key
                 break
             elif c == 27:        # Escape Key
@@ -195,9 +209,9 @@ class Screen(object):
                     return ""
 
                 read_string = read_string[:-1]
-                self.bar_cmd.erase()
-                self.bar_cmd.addstr(":" + read_string)
-                self.bar_cmd.refresh()
+                self.BarCommand.erase()
+                self.BarCommand.addstr(":" + read_string)
+                self.BarCommand.refresh()
 
             else:
                 if c < 256:
@@ -211,10 +225,13 @@ class Screen(object):
         self.Release()
         return read_string
 
-    def Display(self, string, x=0, y=0, bold=False, highlight=False,color=False,strike=False):
+    def Display(self, string, x=0, y=0, bold=False, highlight=False,color=False,strike=False,window=None):
     #    self.write_string(string,x,y,bold,highlight,color,strike)
     #
-    #def write_string(self, string, x=0, y=0, bold=False, highlight=False,color=False,strike=False):
+        if(window is None):
+            #logger.debug("No window specifed, defaulting to screen")
+            window = self.screen
+
         self.Lock()
 
         #Does it need to be struck out?
@@ -232,13 +249,14 @@ class Screen(object):
             options = options | curses.A_BOLD
 
         try:
-            self.screen.addstr(x, y, string, options)
+            window.addstr(x, y, string, options)
         except curses.error:
             #This is probably a cursor error, safe to ignore it?
             #DEBUG.logging.debug("Curses error: Pads throw incorrect size errors")
             pass
 
-        self.Refresh()
+        window.refresh()
+
         self.Release()
 
 
@@ -289,8 +307,8 @@ class Screen(object):
         self.screen = curses.getwin(self.ctxts[register])
 
         # Clear Notification Line
-        self.status_display.erase()
-        self.status_display.refresh()
+        self.StatusDisplay.erase()
+        self.StatusDisplay.refresh()
 
     def Save(self):
         self.stack.append(self.stackFile.tell())
@@ -305,8 +323,8 @@ class Screen(object):
         self.screen = curses.getwin(self.stackFile)
 
         # Clear Notification Line
-        self.status_display.erase()
-        self.status_display.refresh()
+        self.StatusDisplay.erase()
+        self.StatusDisplay.refresh()
 
         self.Refresh()
 
@@ -337,7 +355,8 @@ class Screen(object):
 
     def ClearTextArea(self):
         # Clear the area where tasks are displayed
-        self.ClearRegion(C.SCR_MAX_MENU_ROWS+7, C.SCR_X-2, 0, C.SCR_Y)
+        self.WinDetails.erase()
+        #self.ClearRegion(C.SCR_MAX_MENU_ROWS+7, C.SCR_X-2, 0, C.SCR_Y)
 
 
     def StringInput(self, x=0, y=0):

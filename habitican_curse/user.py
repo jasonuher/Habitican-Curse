@@ -81,7 +81,7 @@ class User(object):
     def PrintData(self):
 
         #Clear the attribute bar
-        G.screen.bar_attr.erase()
+        G.screen.BarAttributes.erase()
 
         cursor = 1
         self.cursorPositions = []
@@ -153,32 +153,32 @@ class User(object):
             diffDict['exp'] = ""
 
         #Clear the command bar
-        G.screen.bar_cmd.erase()
+        G.screen.BarCommand.erase()
 
         # Level
         G.screen.write_user_attribute(
                 diffDict['lvl'],self.cursorPositions[0]+2,
-                C.SCR_COLOR_WHITE, window=G.screen.bar_cmd)
+                C.SCR_COLOR_WHITE, window=G.screen.BarCommand)
 
         # Health
         G.screen.write_user_attribute(
                 diffDict['hp'], self.cursorPositions[1]+2,
-                C.SCR_COLOR_RED, window=G.screen.bar_cmd)
+                C.SCR_COLOR_RED, window=G.screen.BarCommand)
 
         # Experience
         G.screen.write_user_attribute(
                 diffDict['exp'], self.cursorPositions[2]+2,
-                C.SCR_COLOR_GREEN, window=G.screen.bar_cmd)
+                C.SCR_COLOR_GREEN, window=G.screen.BarCommand)
 
         # Mana
         G.screen.write_user_attribute(
                 diffDict['mp'], self.cursorPositions[3]+2,
-                C.SCR_COLOR_BLUE, window=G.screen.bar_cmd)
+                C.SCR_COLOR_BLUE, window=G.screen.BarCommand)
 
         # Gold
         G.screen.write_user_attribute(
                 diffDict['gp'], self.cursorPositions[4]+2,
-                C.SCR_COLOR_YELLOW, window=G.screen.bar_cmd)
+                C.SCR_COLOR_YELLOW, window=G.screen.BarCommand)
 
     def GetPartyData(self):
 

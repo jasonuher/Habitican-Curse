@@ -35,9 +35,9 @@ class Interface(object):
         self.currentMenu = 0
 
     def Init(self):
-        G.HabitMenu.SetXY(1, 2)
-        G.DailyMenu.SetXY(1, 6 + C.SCR_MENU_ITEM_WIDTH)
-        G.TODOMenu.SetXY(1, 10 + 2*C.SCR_MENU_ITEM_WIDTH)
+        G.HabitMenu.SetXY(0, 2)
+        G.DailyMenu.SetXY(0, 6 + C.SCR_MENU_ITEM_WIDTH)
+        G.TODOMenu.SetXY(0, 10 + 2*C.SCR_MENU_ITEM_WIDTH)
 
         G.HabitMenu.Reload()
         G.DailyMenu.Reload()
@@ -48,7 +48,7 @@ class Interface(object):
         G.TODOMenu.Init()
 
         # Borders
-        G.screen.Display(u'\u2550'.encode('utf-8')*C.SCR_Y, 14, 0,bold=True,color=C.SCR_COLOR_WHITE)
+        #G.screen.Display(u'\u2550'.encode('utf-8')*C.SCR_Y, 13, 0,bold=True,color=C.SCR_COLOR_WHITE)
 
         # User Stats
         G.user.PrintData()

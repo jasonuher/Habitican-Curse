@@ -113,24 +113,25 @@ class Task(object):
         #G.screen.RestoreRegister(0)
         G.screen.ClearTextArea()
         X, Y = self.x, self.y
+        X = 3
 
         # Title Display
         title_wrap = textwrap.wrap(self.text, C.SCR_Y-20)
         for i in title_wrap:
             G.screen.Display(i+'\n',  X, Y,
-                    color=self.color,bold=True)
+                    color=self.color,bold=True,window=G.screen.WinDetails)
             X += 1
 
         # Difficulty
-        G.screen.Display("Difficulty: ", X, Y,bold=True)
+        G.screen.Display("Difficulty: ", X, Y,bold=True,window=G.screen.WinDetails)
         G.screen.Display(self.difficulty, X, Y+12,
-                color=C.SCR_COLOR_MAGENTA, bold=True)
+                color=C.SCR_COLOR_MAGENTA, bold=True,window=G.screen.WinDetails)
         X += 1
 
         # Date Created
-        G.screen.Display("Date Created: ", X, Y,bold=True)
+        G.screen.Display("Date Created: ", X, Y,bold=True,window=G.screen.WinDetails)
         G.screen.Display(self.dateCreated.DateCreatedFormat(),X, Y+14,
-                         color=C.SCR_COLOR_MAGENTA,bold=True)
+                         color=C.SCR_COLOR_MAGENTA,bold=True,window=G.screen.WinDetails)
         X += 1
 
         return X
@@ -224,21 +225,21 @@ class Daily(Task):
 
         if self.frequency == "daily": # Every X days
             G.screen.Display("Every " + str(self.everyX) + " days",X, Y,
-                    color=C.SCR_COLOR_MAGENTA, bold=True)
+                    color=C.SCR_COLOR_MAGENTA, bold=True,window=G.screen.WinDetails)
         else:                         # Active on some days of the week
             G.screen.Display("Active: " + RepeatToString(self.repeat), X, Y,
-                    color=C.SCR_COLOR_MAGENTA, bold=True)
+                    color=C.SCR_COLOR_MAGENTA, bold=True,window=G.screen.WinDetails)
         X += 2
 
         # Checklist
         if self.checklist:
             done, total = self.ChecklistTuple()
             G.screen.Display("Checklist: " + "("+str(done)+"/"+str(total)+")" + " completed", X, Y,
-                             color=C.SCR_COLOR_MAGENTA,bold=True)
+                             color=C.SCR_COLOR_MAGENTA,bold=True,window=G.screen.WinDetails)
             X += 2
 
         if not self.isDue:
-            G.screen.Display("Not Due Today", X, Y,color=C.SCR_COLOR_NEUTRAL, bold=True)
+            G.screen.Display("Not Due Today", X, Y,color=C.SCR_COLOR_NEUTRAL, bold=True,window=G.screen.WinDetails)
 
     def ShowChecklist(self, menuItem):
         if self.checklistMenu == None:
@@ -339,14 +340,14 @@ class TODO(Task):
         # Due Date
         if self.date != "":
             G.screen.Display("Due: " + H.DateTime(self.date).DateCreatedFormat() + " (dd/mm/yy)",
-                             X,Y,color=C.SCR_COLOR_MAGENTA, bold=True)
+                             X,Y,color=C.SCR_COLOR_MAGENTA, bold=True,window=G.screen.WinDetails)
             X += 2
 
         # Checklist
         if self.checklist:
             done, total = self.ChecklistTuple()
             G.screen.Display("Checklist: " + "("+str(done)+"/"+str(total)+")" + " completed",
-                             X,Y,color=C.SCR_COLOR_MAGENTA, bold=True)
+                             X,Y,color=C.SCR_COLOR_MAGENTA, bold=True,window=G.screen.WinDetails)
             X += 2
 
     def ShowChecklist(self, menuItem):

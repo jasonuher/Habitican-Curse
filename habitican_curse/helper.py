@@ -494,10 +494,47 @@ def HelpPage():
                    "##########################################################"
                    ]
 
-    help_items = [M.SimpleTextItem(i) for i in help_items]
-    G.screen.SaveInRegister(1)
-    helpMenu = M.SimpleTextMenu(help_items, C.SCR_TEXT_AREA_LENGTH)
-    helpMenu.SetXY(C.SCR_FIRST_HALF_LENGTH, 5)
-    helpMenu.Display()
-    helpMenu.Input()
-    G.screen.RestoreRegister(1)
+
+    elf = G.screen
+    window = elf.WinOverlay
+    items = help_items
+
+
+
+    startline = 0
+    currline = 0
+    nlines = 0
+    winy,winx = elf.WinOverlay.getmaxyx()
+
+    elf.write_status_bar("Press q to exit...")
+    while(1):
+
+        for line in items:
+            Display(line, nlines, 0,window=elf.WinOverlay)
+
+        elf.WinOverlay.refresh()
+        elf.WinOverlay.redrawwin()
+
+        c = elf.GetCharacter()
+        if c == curses.KEY_UP or c == ord('k'):
+            #self.ScrollUp()
+            pass
+        elif c == curses.KEY_DOWN or c == ord('j'):
+            #self.ScrollDown()
+            pass
+        elif c == 27 or c == ord('q'):
+            break
+
+        elf.write_status_bar("Press q to exit...")
+
+    #Get rid of the window and redraw the ones under it
+    # Maybe the panel module would be better here?
+
+    elf.StatusDisplay.erase()
+    elf.StatusDisplay.refresh()
+
+    elf.WinDetails.refresh()
+    elf.WinItems.refresh()
+
+    elf.WinItems.redrawwin()
+    elf.WinDetails.redrawwin()
