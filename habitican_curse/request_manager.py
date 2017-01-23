@@ -26,7 +26,10 @@ logger = logging.getLogger(__name__)
 logger.debug("Debug logging started for %s..." % __name__)
 
 # URL Definitions
-API_URL = "https://habitica.com:443/api/v3"
+if( C.getConfig("local_server") ):
+    API_URL = "http://localhost:3000/api/v3"
+else:
+    API_URL = "https://habitica.com:443/api/v3"
 
 #Request Methods
 request_methods = dict()

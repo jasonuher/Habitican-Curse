@@ -113,12 +113,17 @@ def ReadConfigFile():
         f.write("uuid="+uuid+"\n")
         f.write("key="+key+"\n")
         f.write("debug_lvl=50\n")
+        f.write("local_server=False\n")
         f.close()
 
         f = open(CONFIG_FILE, 'r')
 
     for x in f.xreadlines():
         x = x[:-1].split("=")
+
+        x[1] = False if x[1] == "False" else x[1]
+        x[1] = True if x[1] == "True" else x[1]
+
         user_config[x[0]] = x[1]
 
     f.close()
